@@ -48,10 +48,12 @@ type Backend interface {
 
 // Translation is a struct for translations, including Translation Key, Locale, Value
 type Translation struct {
-	Key     string
-	Locale  string
-	Value   string
-	Backend Backend `json:"-"`
+	Key         string
+	Locale      string
+	Value       string
+	Backend     Backend `json:"-"`
+	Id          string  `sql:"size:12;"`
+	Description string  `sql:"size:4294967295;"`
 }
 
 // New initialize I18n with backends

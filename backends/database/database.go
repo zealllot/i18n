@@ -9,9 +9,11 @@ import (
 
 // Translation is a struct used to save translations into databae
 type Translation struct {
-	Locale string `sql:"size:12;"`
-	Key    string `sql:"size:4294967295;"`
-	Value  string `sql:"size:4294967295"`
+	Locale      string `sql:"size:12;"`
+	Key         string `sql:"size:4294967295;"`
+	Value       string `sql:"size:4294967295"`
+	Id          string `sql:"size:12;"`
+	Description string `sql:"size:4294967295;"`
 }
 
 // New new DB backend for I18n

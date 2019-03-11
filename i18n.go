@@ -302,11 +302,13 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 		}
 
 		type matchedTranslation struct {
-			Key           string
-			PrimaryLocale string
-			PrimaryValue  string
-			EditingLocale string
-			EditingValue  string
+			Key                string
+			PrimaryLocale      string
+			PrimaryValue       string
+			EditingLocale      string
+			EditingValue       string
+			EditingId          string
+			EditingDescription string
 		}
 
 		res.GetAdmin().RegisterFuncMap("i18n_available_translations", func(context *admin.Context) (results []matchedTranslation) {
@@ -326,10 +328,12 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 							strings.Index(strings.ToLower(translation.Value), keyword) != -1) {
 							if _, ok := matchedTranslations[key]; !ok {
 								var t = matchedTranslation{
-									Key:           key,
-									PrimaryLocale: primaryLocale,
-									EditingLocale: editingLocale,
-									EditingValue:  translation.Value,
+									Key:                key,
+									PrimaryLocale:      primaryLocale,
+									EditingLocale:      editingLocale,
+									EditingValue:       translation.Value,
+									EditingId:          translation.Id,
+									EditingDescription: translation.Description,
 								}
 
 								if localeTranslations, ok := translationsMap[primaryLocale]; ok {

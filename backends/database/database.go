@@ -12,8 +12,8 @@ type Translation struct {
 	Locale      string `sql:"size:12;"`
 	Key         string `sql:"size:4294967295;"`
 	Value       string `sql:"size:4294967295"`
-	Id          string `sql:"size:12;"`
-	Description string `sql:"size:4294967295;"`
+	DisplayId   string `sql:"size:12;"`
+	Description string `sql:"size:4294967295"`
 }
 
 // New new DB backend for I18n
@@ -38,8 +38,11 @@ func (backend *Backend) LoadTranslations() (translations []*i18n.Translation) {
 
 // SaveTranslation save translation into DB backend
 func (backend *Backend) SaveTranslation(t *i18n.Translation) error {
+	fmt.Println("拿到了")
+	fmt.Println(t.Key, t.Locale, t.Value, t.DisplayId, t.Description)
+
 	return backend.DB.Where(Translation{Key: t.Key, Locale: t.Locale}).
-		Assign(Translation{Value: t.Value, Id: t.Id, Description: t.Description}).
+		Assign(Translation{Value: t.Value, DisplayId: t.DisplayId, Description: t.Description}).
 		FirstOrCreate(&Translation{}).Error
 }
 

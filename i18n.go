@@ -52,8 +52,8 @@ type Translation struct {
 	Locale      string
 	Value       string
 	Backend     Backend `json:"-"`
-	Id          string  `sql:"size:12;"`
-	Description string  `sql:"size:4294967295;"`
+	DisplayId   string
+	Description string
 }
 
 // New initialize I18n with backends
@@ -138,6 +138,9 @@ func (i18n *I18n) Fallbacks(locale ...string) admin.I18n {
 
 // T translate with locale, key and arguments
 func (i18n *I18n) T(locale, key string, args ...interface{}) template.HTML {
+
+	fmt.Println("进到t里面去了")
+
 	var (
 		value           = i18n.value
 		translationKey  = key
@@ -158,7 +161,10 @@ func (i18n *I18n) T(locale, key string, args ...interface{}) template.HTML {
 	}
 
 	var translation Translation
-	if err := i18n.cacheStore.Unmarshal(cacheKey(locale, key), &translation); err != nil || translation.Value == "" {
+	err := i18n.cacheStore.Unmarshal(cacheKey(locale, key), &translation)
+	fmt.Println("error:", err)
+	fmt.Println("translation:", translation.Value)
+	if err != nil || translation.Value == "" {
 		for _, fallbackLocale := range fallbackLocales {
 			if err := i18n.cacheStore.Unmarshal(cacheKey(fallbackLocale, key), &translation); err == nil && translation.Value != "" {
 				break
@@ -175,6 +181,8 @@ func (i18n *I18n) T(locale, key string, args ...interface{}) template.HTML {
 				}
 				translation = Translation{Key: translationKey, Value: value, Locale: locale, Backend: defaultBackend}
 
+				fmt.Println("准备save")
+				fmt.Println(translation)
 				// Save translation
 				i18n.SaveTranslation(&translation)
 			}
@@ -332,7 +340,7 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 									PrimaryLocale:      primaryLocale,
 									EditingLocale:      editingLocale,
 									EditingValue:       translation.Value,
-									EditingId:          translation.Id,
+									EditingId:          translation.DisplayId,
 									EditingDescription: translation.Description,
 								}
 

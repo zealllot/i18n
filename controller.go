@@ -1,7 +1,6 @@
 package i18n
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/qor/admin"
@@ -30,10 +29,6 @@ func (controller *i18nController) Update(context *admin.Context) {
 
 	adminTranslation := Translation{Key: key, Locale: "admin_" + locale, Value: adminValue, DisplayId: displayId, Description: descriprion}
 	supplierTranslation := Translation{Key: key, Locale: "supplier_" + locale, Value: supplierValue, DisplayId: displayId, Description: descriprion}
-
-	fmt.Println("出现了")
-	fmt.Println("adminTranslation", adminTranslation)
-	fmt.Println("supplierTranslation", supplierTranslation)
 
 	var hasError bool
 	var errMessage string

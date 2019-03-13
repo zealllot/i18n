@@ -38,9 +38,6 @@ func (backend *Backend) LoadTranslations() (translations []*i18n.Translation) {
 
 // SaveTranslation save translation into DB backend
 func (backend *Backend) SaveTranslation(t *i18n.Translation) error {
-	fmt.Println("拿到了")
-	fmt.Println(t.Key, t.Locale, t.Value, t.DisplayId, t.Description)
-
 	return backend.DB.Where(Translation{Key: t.Key, Locale: t.Locale}).
 		Assign(Translation{Value: t.Value, DisplayId: t.DisplayId, Description: t.Description}).
 		FirstOrCreate(&Translation{}).Error

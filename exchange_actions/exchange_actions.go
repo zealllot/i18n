@@ -74,7 +74,7 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 			writer := csv.NewWriter(csvfile)
 
 			// Append Headers
-			writer.Write(append([]string{"Translation Keys"}, append(locales, []string{"Id", "Description"}...)...))
+			writer.Write(append([]string{"Translation Keys", "Id", "Description"}, locales...))
 
 			// Sort translation keys
 			for _, locale := range locales {
@@ -108,6 +108,7 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 				var translations = []string{translationKey}
 				var id string
 				var description string
+				var values = []string{}
 				for _, locale := range locales {
 					var value string
 					if translation := i18nTranslations[locale][translationKey]; translation != nil {
@@ -119,9 +120,9 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 							description = translation.Description
 						}
 					}
-					translations = append(translations, value)
+					values = append(values, value)
 				}
-				translations = append(translations, []string{id, description}...)
+				translations = append(translations, append([]string{id, description}, values...)...)
 				writer.Write(translations)
 				processedRecordLogs = append(processedRecordLogs, fmt.Sprintf("Exported %v\n", strings.Join(translations, ",")))
 				if index == perCount {
@@ -151,18 +152,21 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 			if csvfile, err := os.Open(filepath.Join("public", importTranslationArgument.TranslationsFile.URL())); err == nil {
 				reader := csv.NewReader(csvfile)
 				reader.TrimLeadingSpace = true
-				if records, err := reader.ReadAll(); err == nil {
+				records, err := reader.ReadAll()
+				if err == nil {
 					if len(records) > 1 && len(records[0]) > 1 {
 						var (
 							recordCount         = len(records) - 1
 							perCount            = recordCount/20 + 1
 							processedRecordLogs = []string{}
-							locales             = records[0][1:]
+							locales             = records[0][3:]
 							index               = 1
 						)
+						fmt.Println("records", records)
 						for _, values := range records[1:] {
+							fmt.Println("values", values)
 							logMsg := ""
-							for idx, value := range values[1:] {
+							for idx, value := range values[3:] {
 								if value == "" {
 									if values[0] != "" && locales[idx] != "" {
 										I18n.DeleteTranslation(&i18n.Translation{
@@ -173,9 +177,11 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 									}
 								} else {
 									I18n.SaveTranslation(&i18n.Translation{
-										Key:    values[0],
-										Locale: locales[idx],
-										Value:  value,
+										Key:         values[0],
+										Locale:      locales[idx],
+										Value:       value,
+										DisplayId:   values[1],
+										Description: values[2],
 									})
 									logMsg += fmt.Sprintf("%v/%v Imported %v,%v,%v\n", index, recordCount, locales[idx], values[0], value)
 								}
@@ -190,6 +196,9 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 						}
 						qorJob.AddLog(strings.Join(processedRecordLogs, ""))
 					}
+				}
+				if err != nil {
+					qorJob.AddLog(err.Error())
 				}
 				qorJob.AddLog("Imported translations")
 			}

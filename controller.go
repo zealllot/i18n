@@ -17,7 +17,7 @@ func (controller *i18nController) Index(context *admin.Context) {
 
 func (controller *i18nController) Update(context *admin.Context) {
 	form := context.Request.Form
-	translation := Translation{Key: form.Get("Key"), Locale: form.Get("Locale"), Value: utils.HTMLSanitizer.Sanitize(form.Get("Value")), DisplayId: utils.HTMLSanitizer.Sanitize(form.Get("DisplayId")), Description: utils.HTMLSanitizer.Sanitize(form.Get("Description"))}
+	translation := Translation{Key: form.Get("Key"), Locale: form.Get("Locale"), Value: utils.HTMLSanitizer.Sanitize(form.Get("Value")), DisplayId: utils.HTMLSanitizer.Sanitize(form.Get("Id")), Description: utils.HTMLSanitizer.Sanitize(form.Get("Description"))}
 
 	fmt.Println("出现了")
 	fmt.Println(translation)

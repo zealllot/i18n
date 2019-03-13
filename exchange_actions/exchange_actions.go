@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/qor/admin"
-	"github.com/zealllot/i18n"
 	"github.com/qor/media/oss"
 	"github.com/qor/worker"
+	"github.com/zealllot/i18n"
 )
 
 type ExportTranslationArgument struct {
@@ -74,7 +74,7 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 			writer := csv.NewWriter(csvfile)
 
 			// Append Headers
-			writer.Write(append([]string{"Translation Keys"}, locales...))
+			writer.Write(append([]string{"Translation Keys"}, append(locales, []string{"Id", "Description"}...)...))
 
 			// Sort translation keys
 			for _, locale := range locales {
@@ -106,13 +106,22 @@ func RegisterExchangeJobs(I18n *i18n.I18n, Worker *worker.Worker) {
 					continue
 				}
 				var translations = []string{translationKey}
+				var id string
+				var description string
 				for _, locale := range locales {
 					var value string
 					if translation := i18nTranslations[locale][translationKey]; translation != nil {
 						value = translation.Value
+						if translation.DisplayId != "" {
+							id = translation.DisplayId
+						}
+						if translation.Description != "" {
+							description = translation.Description
+						}
 					}
 					translations = append(translations, value)
 				}
+				translations = append(translations, []string{id, description}...)
 				writer.Write(translations)
 				processedRecordLogs = append(processedRecordLogs, fmt.Sprintf("Exported %v\n", strings.Join(translations, ",")))
 				if index == perCount {

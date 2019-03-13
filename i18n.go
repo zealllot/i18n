@@ -310,13 +310,14 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 		}
 
 		type matchedTranslation struct {
-			Key                string
-			PrimaryLocale      string
-			PrimaryValue       string
-			EditingLocale      string
-			EditingValue       string
-			EditingId          string
-			EditingDescription string
+			Key                  string
+			PrimaryLocale        string
+			PrimaryValue         string
+			EditingLocale        string
+			EditingAdminValue    string
+			EditingSupplierValue string
+			EditingId            string
+			EditingDescription   string
 		}
 
 		res.GetAdmin().RegisterFuncMap("i18n_available_translations", func(context *admin.Context) (results []matchedTranslation) {
@@ -329,19 +330,71 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 				editingLocale       = getEditingLocale(context)
 			)
 
-			var filterTranslations = func(translations map[string]*Translation, isPrimary bool) {
+			//var filterTranslations = func(translationss []map[string]*Translation, isPrimary bool) {
+			//	if translationss[0] != nil {
+			//		for key, translation := range translationss[0] {
+			//			if (keyword == "") || (strings.Index(strings.ToLower(translation.Key), keyword) != -1 ||
+			//				strings.Index(strings.ToLower(translation.Value), keyword) != -1) {
+			//				if _, ok := matchedTranslations[key]; !ok {
+			//					var t = matchedTranslation{
+			//						Key:                key,
+			//						PrimaryLocale:      primaryLocale,
+			//						EditingLocale:      editingLocale,
+			//						EditingAdminValue:  translation.Value,
+			//						EditingId:          translation.DisplayId,
+			//						EditingDescription: translation.Description,
+			//					}
+			//					if translationss[1] != nil {
+			//						t.EditingSupplierValue = translationss[1][key].Value
+			//					}
+			//
+			//					if localeTranslations, ok := translationsMap[primaryLocale]; ok {
+			//						if v, ok := localeTranslations[key]; ok {
+			//							t.PrimaryValue = v.Value
+			//						}
+			//					}
+			//
+			//					matchedTranslations[key] = t
+			//					keys = append(keys, key)
+			//				}
+			//			}
+			//		}
+			//	}
+			//}
+			//
+			//filterTranslations([]map[string]*Translation{translationsMap["admin_"+getEditingLocale(context)], translationsMap["supplier_"+getEditingLocale(context)]}, false)
+			//if primaryLocale != editingLocale {
+			//	filterTranslations([]map[string]*Translation{translationsMap["admin_"+getPrimaryLocale(context)], translationsMap["supplier_"+getPrimaryLocale(context)]}, true)
+			//}
+
+			///////
+			var filterTranslations = func(translationsMap map[string]map[string]*Translation, locale string, isPrimary bool) {
+
+				locale = strings.TrimLeft(locale, "admin_")
+				locale = strings.TrimLeft(locale, "supplier_")
+
+				var translations map[string]*Translation
+				if translationsMap["admin_"+locale] == nil && translationsMap["supplier_"+locale] == nil {
+					translations = translationsMap[locale]
+				} else {
+					translations = translationsMap["admin_"+locale]
+				}
 				if translations != nil {
 					for key, translation := range translations {
 						if (keyword == "") || (strings.Index(strings.ToLower(translation.Key), keyword) != -1 ||
 							strings.Index(strings.ToLower(translation.Value), keyword) != -1) {
 							if _, ok := matchedTranslations[key]; !ok {
 								var t = matchedTranslation{
-									Key:                key,
-									PrimaryLocale:      primaryLocale,
-									EditingLocale:      editingLocale,
-									EditingValue:       translation.Value,
-									EditingId:          translation.DisplayId,
-									EditingDescription: translation.Description,
+									Key:                  key,
+									PrimaryLocale:        primaryLocale,
+									EditingLocale:        editingLocale,
+									EditingAdminValue:    translation.Value,
+									EditingSupplierValue: translation.Value,
+									EditingId:            translation.DisplayId,
+									EditingDescription:   translation.Description,
+								}
+								if translationsMap["supplier_"+locale] != nil {
+									t.EditingSupplierValue = translationsMap["supplier_"+locale][key].Value
 								}
 
 								if localeTranslations, ok := translationsMap[primaryLocale]; ok {
@@ -358,9 +411,9 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 				}
 			}
 
-			filterTranslations(translationsMap[getEditingLocale(context)], false)
+			filterTranslations(translationsMap, getEditingLocale(context), false)
 			if primaryLocale != editingLocale {
-				filterTranslations(translationsMap[getPrimaryLocale(context)], true)
+				filterTranslations(translationsMap, getPrimaryLocale(context), true)
 			}
 
 			sort.Strings(keys)

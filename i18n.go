@@ -158,8 +158,8 @@ func (i18n *I18n) T(locale, key string, args ...interface{}) template.HTML {
 	}
 
 	var translation Translation
-	err := i18n.cacheStore.Unmarshal(cacheKey(locale, key), &translation)
-	if err != nil || translation.Value == "" {
+
+	if err := i18n.cacheStore.Unmarshal(cacheKey(locale, key), &translation); err != nil || translation.Value == "" {
 		for _, fallbackLocale := range fallbackLocales {
 			if err := i18n.cacheStore.Unmarshal(cacheKey(fallbackLocale, key), &translation); err == nil && translation.Value != "" {
 				break

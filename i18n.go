@@ -375,7 +375,9 @@ func (i18n *I18n) ConfigureQorResource(res resource.Resourcer) {
 				if translations != nil {
 					for key, translation := range translations {
 						if (keyword == "") || (strings.Index(strings.ToLower(translation.Key), keyword) != -1 ||
-							strings.Index(strings.ToLower(translation.Value), keyword) != -1) {
+							strings.Index(strings.ToLower(translation.Value), keyword) != -1 ||
+							strings.Index(strings.ToLower(translation.DisplayId), keyword) != -1 ||
+							strings.Index(strings.ToLower(translation.Description), keyword) != -1) {
 							if _, ok := matchedTranslations[key]; !ok {
 								var t = matchedTranslation{
 									Key:                  key,
